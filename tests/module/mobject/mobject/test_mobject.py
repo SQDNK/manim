@@ -157,3 +157,49 @@ def test_mobject_dimensions_has_points_and_children():
     assert inner_rect.width == 2
     assert inner_rect.height == 1
     assert inner_rect.depth == 0
+
+
+def test_mobject_insert():
+    """Test Mobject.insert()."""
+    obj = Mobject()
+    obj.add(*(Mobject() for _ in range(10)))
+
+    # check that out-of-bounds insertion is caught (**TODO: do we want to check this
+    # manually?)
+    with pytest.raises(IndexError):
+        obj.insert(-1, Mobject())
+    with pytest.raises(IndexError):
+        obj.insert(len(obj.submobjects), Mobject())
+
+    # check that the inserted mobject is at the correct position. check positions
+    # start, end, in between
+    # do these in order because indices will change as inserts are made
+    start, end, mid = Mobject(), Mobject(), Mobject()
+    obj.insert(0, start)
+    assert obj.submobjects[0] == start
+
+    obj.insert(4, mid)
+    assert obj.submobjects[4] == mid
+
+    endIndex = len(obj.submobjects) - 1
+    obj.insert(endIndex, end)
+    assert obj.submobjects[endIndex] == end
+
+    # check that inserting a mobject twice does not insert it twice
+    repeated = Mobject()
+    obj.insert(0, repeated)
+    assert len(obj.submobjects) == 14
+    obj.insert(0, repeated)
+    assert len(obj.submobjects) == 14
+
+    # check that Mobject.insert() does not return anything
+    assert obj.insert(Mobject()) is None
+
+    # a Mobject cannot contain itself
+    obj = Mobject()
+    with pytest.raises(ValueError):
+        obj.insert(0, obj)
+
+    # can only add Mobjects
+    with pytest.raises(TypeError):
+        obj.insert(0, "foo")

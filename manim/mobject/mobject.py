@@ -460,7 +460,18 @@ class Mobject:
             raise TypeError("All submobjects must be of type Mobject")
         if mobject is self:
             raise ValueError("Mobject cannot contain self")
-        self.submobjects.insert(index, mobject)
+        if (index < 0) or (index >= len(self.submobjects)):
+            raise IndexError("Chosen index is out of bounds")
+
+        if mobject in self.submobjects:
+            logger.warning(
+                "Attempted adding some Mobject as a child more than once, "
+                "this is not possible. Repetitions are ignored."
+            )
+        else:
+            self.submobjects.insert(index, mobject)
+
+        return self
 
     def __add__(self, mobject):
         raise NotImplementedError
